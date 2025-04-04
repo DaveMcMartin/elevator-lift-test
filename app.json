@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "elevator-lift-test",
+    "name": "Elevator Lift Test",
     "slug": "elevator-lift-test",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,6 +23,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "permissions": ["MOTION"]
   }
 }
