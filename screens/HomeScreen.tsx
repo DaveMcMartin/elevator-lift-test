@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
@@ -90,13 +90,25 @@ const HomeScreen = () => {
     _unsubscribe();
   };
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text>Elevator Lift Test</Text>
+      <Text>
+        Tap the button below to start measuring when the elevator is in motion.
+      </Text>
+      {isMeasuring && (
+        <View>
+          <Text>Recording measurement...</Text>
+          <View>
+            <Text>Velocity</Text>
+            <Text>0,00 m/s</Text>
+          </View>
+        </View>
+      )}
       <Button
         title={isMeasuring ? "Stop" : "Start"}
         onPress={isMeasuring ? stopMeasuring : startMeasuring}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
