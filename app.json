@@ -25,9 +25,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.davemcmartin.elevatorlifttest"
     },
-    "permissions": ["MOTION"],
-    "plugins": ["expo-localization"]
+    "permissions": [
+      "MOTION"
+    ],
+    "plugins": [
+      "expo-localization"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c79cb140-e86b-4569-977e-b53ece8b1688"
+      }
+    }
   }
 }
