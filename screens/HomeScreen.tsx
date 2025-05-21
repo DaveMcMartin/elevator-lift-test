@@ -1,20 +1,27 @@
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, Image } from "react-native";
 import { Accelerometer } from "expo-sensors";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
+import { colors } from "../constants/colors";
+import MeasurementItem from "../components/MeasurementItem";
 
 const HomeScreen = () => {
   const [isMeasuring, setIsMeasuring] = useState(false);
-  const [data, setData] = useState({
-    acceleration: [],
-    velocity: [],
-    jerk: [],
-    timestamps: [],
+  const [data, setData] = useState<{
+    acceleration: number;
+    velocity: number;
+    jerk: number;
+    lastUpdated: number | null;
+  }>({
+    acceleration: 0,
+    velocity: 0,
+    jerk: 0,
+    lastUpdated: null,
   });
+  const [history, setHistory] = useState([]);
   const [subscription, setSubscription] = useState(null);
 
   useEffect(() => {
-    // every 100ms
     Accelerometer.setUpdateInterval(100);
     return () => {
       _unsubscribe();
@@ -22,62 +29,43 @@ const HomeScreen = () => {
   }, []);
 
   const _subscribe = () => {
-    setData({ acceleration: [], velocity: [], jerk: [], timestamps: [] });
     const startTime = Date.now();
+    let lastAcceleration = 0;
+    let lastVelocity = 0;
+    let lastTimestamp = 0;
 
     const sub = Accelerometer.addListener((accelerometerData) => {
       const { x, y, z } = accelerometerData;
       const currentTime = Date.now();
-      const timeElapsed = (currentTime - startTime) / 1000; // Convert to seconds
+      const timeElapsed = (currentTime - startTime) / 1000;
 
-      // magnitude of acceleration
-      const acceleration = Math.sqrt(x * x + y * y + z * z);
+      const currentAcceleration = Math.sqrt(x * x + y * y + z * z);
+      const dt = timeElapsed - lastTimestamp;
+      const currentVelocity = lastVelocity + lastAcceleration * dt;
 
-      setData((prevData) => {
-        const newAcceleration = [...prevData.acceleration, acceleration];
-        const newTimestamps = [...prevData.timestamps, timeElapsed];
+      const currentJerk =
+        dt > 0 ? (currentAcceleration - lastAcceleration) / dt : 0;
 
-        // velocity (numerical integration of acceleration)
-        const velocity = calculateVelocity(newAcceleration, newTimestamps);
-
-        // jerk (derivative of acceleration)
-        const jerk = calculateJerk(newAcceleration, newTimestamps);
-
-        return {
-          acceleration: newAcceleration,
-          velocity,
-          jerk,
-          timestamps: newTimestamps,
-        };
+      setData({
+        acceleration: currentAcceleration,
+        velocity: currentVelocity,
+        jerk: currentJerk,
+        lastUpdated: currentTime,
       });
+
+      lastAcceleration = currentAcceleration;
+      lastVelocity = currentVelocity;
+      lastTimestamp = timeElapsed;
     });
     setSubscription(sub);
   };
 
   const _unsubscribe = () => {
-    subscription && subscription.remove();
-    setSubscription(null);
-  };
-
-  const calculateVelocity = (acceleration, timestamps) => {
-    const velocity = [0];
-
-    for (let i = 1; i < acceleration.length; i++) {
-      const dt = timestamps[i] - timestamps[i - 1];
-      const v = velocity[i - 1] + acceleration[i - 1] * dt;
-      velocity.push(v);
+    if (subscription) {
+      subscription.remove();
+      setSubscription(null);
     }
-    return velocity;
-  };
-
-  const calculateJerk = (acceleration, timestamps) => {
-    const jerk = [0];
-    for (let i = 1; i < acceleration.length; i++) {
-      const dt = timestamps[i] - timestamps[i - 1];
-      const j = (acceleration[i] - acceleration[i - 1]) / dt;
-      jerk.push(j);
-    }
-    return jerk;
+    setHistory((prev) => [...prev, data]);
   };
 
   const startMeasuring = () => {
@@ -89,21 +77,49 @@ const HomeScreen = () => {
     setIsMeasuring(false);
     _unsubscribe();
   };
+
+  const formatValue = (value) => {
+    return value.toFixed(2);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Elevator Lift Test</Text>
-      <Text>
-        Tap the button below to start measuring when the elevator is in motion.
-      </Text>
-      {isMeasuring && (
-        <View>
-          <Text>Recording measurement...</Text>
-          <View>
-            <Text>Velocity</Text>
-            <Text>0,00 m/s</Text>
-          </View>
+      <Text style={styles.title}>Elevator Lift Test</Text>
+      <View style={styles.helpContainer}>
+        <Image
+          source={require("../assets/images/adaptive-icon.png")}
+          style={styles.helpImage}
+        />
+        {!isMeasuring && history.length === 0 && (
+          <Text style={styles.helpInfoText}>
+            Tap the button below to start measuring when the elevator is in
+            motion.
+          </Text>
+        )}
+      </View>
+
+      {(isMeasuring || history.length > 0) && (
+        <View style={styles.measurementContainer}>
+          {isMeasuring ? (
+            <Text style={styles.measurementText}>Recording measurement...</Text>
+          ) : (
+            <Text style={styles.measurementText}>Last measurement</Text>
+          )}
+          <MeasurementItem
+            label="Acceleration"
+            value={`${formatValue(data.acceleration)} m/s²`}
+          />
+          <MeasurementItem
+            label="Velocity"
+            value={`${formatValue(data.velocity)} m/s`}
+          />
+          <MeasurementItem
+            label="Jerk"
+            value={`${formatValue(data.jerk)} m/s³`}
+          />
         </View>
       )}
+
       <Button
         title={isMeasuring ? "Stop" : "Start"}
         onPress={isMeasuring ? stopMeasuring : startMeasuring}
@@ -115,9 +131,43 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.deepBlue,
     alignItems: "center",
     justifyContent: "center",
+    padding: 20,
+  },
+  title: {
+    fontSize: 32,
+    color: colors.white,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  helpContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  helpInfoText: {
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  helpImage: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+  },
+  measurementContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    maxWidth: 280,
+    marginBottom: 20,
+  },
+  measurementText: {
+    fontSize: 18,
+    color: colors.white,
+    marginBottom: 20,
   },
 });
 
