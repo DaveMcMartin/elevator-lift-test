@@ -1,4 +1,3 @@
-
-describe('components/MeasurementIte', () => {
+describe("components/MeasurementIte", () => {
   // TODO: Implement tests here
-})
+});

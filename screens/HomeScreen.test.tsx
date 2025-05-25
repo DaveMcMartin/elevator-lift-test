@@ -1,4 +1,3 @@
-
-describe('screens/HomeScreen', () => {
+describe("screens/HomeScreen", () => {
   // TODO: Implement tests here
-})
+});
