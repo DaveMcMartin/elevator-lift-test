@@ -75,8 +75,13 @@ const Graph = ({ data }: Props) => {
         strokeWidth: 2,
         color: () => colors.green,
       },
+      {
+        data: processedData.map((d) => d.ambientNoise ?? 0),
+        strokeWidth: 2,
+        color: () => colors.pink,
+      },
     ],
-    legend: ["Acceleration", "Velocity", "Jerk"],
+    legend: ["Acceleration", "Velocity", "Jerk", "Amb. Noise"],
   };
 
   return (
