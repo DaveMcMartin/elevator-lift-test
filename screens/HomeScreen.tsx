@@ -26,6 +26,7 @@ import Graph from "../components/Graph";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import { sleep } from "../utils/helper";
+import { useI18n } from "../i18n/useI18n";
 
 export type MovingDataFrame = {
   acceleration: number;
@@ -43,6 +44,8 @@ export type MeasurementSummary = {
 };
 
 const HomeScreen = () => {
+  const screenHeight = Dimensions.get("screen").height;
+  const { L } = useI18n();
   const [isMeasuring, setIsMeasuring] = useState(false);
   const [subscription, setSubscription] = useState<ReturnType<
     typeof DeviceMotion.addListener
@@ -194,10 +197,7 @@ const HomeScreen = () => {
     if (status === "granted") {
       return true;
     }
-    Alert.alert(
-      "Permission Required",
-      "Audio recording permission is needed for noise detection.",
-    );
+    Alert.alert(L("permission_required"), L("audio_permission_needed"));
     return false;
   };
 
@@ -247,7 +247,7 @@ const HomeScreen = () => {
       await newRecording.startAsync();
     } catch (err) {
       console.error("Failed to start audio recording for metering", err);
-      Alert.alert("Audio Error", "Could not start audio metering.");
+      Alert.alert(L("audio_error"), L("audio_metering_failed"));
     }
   };
 
@@ -279,7 +279,7 @@ const HomeScreen = () => {
   const startMeasuring = async () => {
     const isMotionAvailable = await DeviceMotion.isAvailableAsync();
     if (!isMotionAvailable) {
-      Alert.alert("Device Motion sensor is not available on this device.");
+      Alert.alert(L("device_motion_unavailable"));
       return;
     }
     const audioPermitted = await requestAudioPermissions();
@@ -333,7 +333,7 @@ const HomeScreen = () => {
 
   const onPressShare = async () => {
     if (!viewShotRef.current) {
-      Alert.alert("Error", "Unable to capture screenshot.");
+      Alert.alert(L("error"), L("screenshot_capture_failed"));
       return;
     }
     try {
@@ -343,12 +343,12 @@ const HomeScreen = () => {
       setShowButtons(true);
 
       if (!uri) {
-        Alert.alert("Error", "Could not take the screenshot.");
+        Alert.alert(L("error"), L("screenshot_not_taken"));
         return;
       }
       const isAvailable = await Sharing.isAvailableAsync();
       if (!isAvailable) {
-        Alert.alert("Error", "Sharing is not available on this device.");
+        Alert.alert(L("error"), L("sharing_unavailable"));
         return;
       }
       await Sharing.shareAsync(uri, {
@@ -357,18 +357,18 @@ const HomeScreen = () => {
       });
     } catch (error) {
       console.error("Error capturing or sharing screenshot:", error);
-      Alert.alert("Error", "Failed to capture or share screenshot.");
+      Alert.alert(L("error"), L("screenshot_share_failed"));
       setShowButtons(true);
     }
   };
 
   const helpMarginTop = useMemo(() => {
-    return Dimensions.get("screen").height / 3 - 200;
-  }, []);
+    return screenHeight / 3 - 200;
+  }, [screenHeight]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Elevator Lift Test</Text>
+      <Text style={styles.title}>{L("app_title")}</Text>
 
       <ViewShot
         ref={viewShotRef}
@@ -383,7 +383,7 @@ const HomeScreen = () => {
           <View
             style={[
               styles.helpContainer,
-              { marginTop: !isMeasuring && summary ? 0 : helpMarginTop },
+              { marginTop: summary ? 0 : helpMarginTop },
             ]}
           >
             <Image
@@ -391,60 +391,55 @@ const HomeScreen = () => {
               style={styles.helpImage}
             />
             {!isMeasuring && !summary && (
-              <Text style={styles.helpInfoText}>
-                Place the device flat on the elevator floor. Tap the button
-                below to start measuring when the elevator begins motion.
-              </Text>
+              <Text style={styles.helpInfoText}>{L("help_text")}</Text>
             )}
           </View>
 
           {summary && (
             <View style={styles.averages}>
-              <Text style={styles.avgLabel}>Summary:</Text>
+              <Text style={styles.avgLabel}>{L("summary_label")}</Text>
               <MeasurementItem
-                label="Elapsed Time"
+                label={L("elapsed_time")}
                 value={formatDuration(summary.elapsedTime)}
               />
               <MeasurementItem
-                label="Avg. Acceleration"
+                label={L("avg_acceleration")}
                 value={`${summary.avgAcceleration.toFixed(4)} m/s²`}
               />
               <MeasurementItem
-                label="Avg. Velocity"
+                label={L("avg_velocity")}
                 value={`${summary.avgVelocity.toFixed(4)} m/s`}
               />
               <MeasurementItem
-                label="Avg. Jerk"
+                label={L("avg_jerk")}
                 value={`${summary.avgJerk.toFixed(4)} m/s³`}
               />
               {summary.avgAmbientNoise !== undefined && (
                 <MeasurementItem
-                  label="Avg. Ambient Noise"
+                  label={L("avg_ambient_noise")}
                   value={`${summary.avgAmbientNoise.toFixed(1)} dBFS`}
                 />
               )}
               <MeasurementItem
-                label="Data Points"
+                label={L("data_points")}
                 value={`${historyRef.current.length}`}
               />
             </View>
           )}
-
           {summary && !isMeasuring && <Graph data={historyRef.current} />}
+          {showButtons && (
+            <View style={styles.buttonContainer}>
+              <Button
+                title={isMeasuring ? L("stop_button") : L("start_button")}
+                onPress={isMeasuring ? stopMeasuring : startMeasuring}
+              />
+              {summary && historyRef.current.length > 0 && !isMeasuring && (
+                <Button title={L("share_summary")} onPress={onPressShare} />
+              )}
+            </View>
+          )}
         </ScrollView>
       </ViewShot>
-
-      {showButtons && (
-        <View style={styles.buttonContainer}>
-          <Button
-            title={isMeasuring ? "Stop" : "Start"}
-            onPress={isMeasuring ? stopMeasuring : startMeasuring}
-          />
-          {summary && historyRef.current.length > 0 && !isMeasuring && (
-            <Button title="Share Summary" onPress={onPressShare} />
-          )}
-        </View>
-      )}
     </SafeAreaView>
   );
 };
@@ -498,13 +493,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   buttonContainer: {
-    flexDirection: "column",
-    gap: 20,
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
+    flexDirection: "row",
+    gap: 10,
     alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 20,
   },
   viewShot: {
     width: "100%",
