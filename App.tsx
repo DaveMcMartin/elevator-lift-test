@@ -4,7 +4,7 @@ import HomeScreen from "./screens/HomeScreen";
 const App = () => {
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <HomeScreen />
     </>
   );
