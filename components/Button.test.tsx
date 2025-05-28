@@ -13,7 +13,7 @@ describe("components/Button", () => {
   it("calls onPress when the button is pressed", () => {
     const onPressMock = jest.fn();
     const { getByText } = render(
-      <Button title="Click Me" onPress={onPressMock} />,
+      <Button title="Click Me" onPress={onPressMock} />
     );
     fireEvent.press(getByText("Click Me"));
     expect(onPressMock).toHaveBeenCalled();
@@ -27,7 +27,7 @@ describe("components/Button", () => {
         title="Styled Button"
         style={customButtonStyle}
         textStyle={customTextStyle}
-      />,
+      />
     );
 
     const button = getByTestId("button");
@@ -39,7 +39,7 @@ describe("components/Button", () => {
 
   it("applies default styles to the button and text", () => {
     const { getByText, getByTestId } = render(
-      <Button title="Default Button" />,
+      <Button title="Default Button" />
     );
 
     const button = getByTestId("button");
@@ -60,3 +60,4 @@ describe("components/Button", () => {
     });
   });
 });
+```
