@@ -3,6 +3,7 @@ import { LineChart } from "react-native-chart-kit";
 import { MovingDataFrame } from "../screens/HomeScreen";
 import { colors } from "../constants/colors";
 import { formatDuration } from "../utils/number";
+import { useI18n } from "../i18n/useI18n";
 
 const MAX_POINTS_TO_DISPLAY = 75;
 const NUM_X_AXIS_LABELS = 5;
@@ -12,6 +13,8 @@ type Props = {
 };
 
 const Graph = ({ data }: Props) => {
+  const { L } = useI18n();
+
   if (!data || data.length === 0) {
     return (
       <View
@@ -22,7 +25,7 @@ const Graph = ({ data }: Props) => {
           height: 220,
         }}
       >
-        <Text style={{ color: "#666" }}>No data to display.</Text>
+        <Text style={{ color: "#666" }}>{L("no_data_to_display")}</Text>
       </View>
     );
   }
@@ -81,7 +84,7 @@ const Graph = ({ data }: Props) => {
         color: () => colors.pink,
       },
     ],
-    legend: ["Acceleration", "Velocity", "Jerk", "Amb. Noise"],
+    legend: [L("acceleration"), L("velocity"), L("jerk"), L("ambient_noise")],
   };
 
   return (

@@ -3,6 +3,10 @@ import { useCallback } from "react";
 import enUS from "./en-US.json";
 import ptBR from "./pt-BR.json";
 
+type Translations = {
+  [key: string]: string;
+};
+
 export const useI18n = () => {
   const [locale] = useLocales();
   const currentLocal = locale.languageTag || "pt-BR";
@@ -15,7 +19,7 @@ export const useI18n = () => {
   const getString = useCallback(
     (key: string): string => {
       const lcl = getLocale();
-      const strings = lcl === "pt-BR" ? ptBR : enUS;
+      const strings: Translations = lcl === "pt-BR" ? ptBR : enUS;
       return strings[key] || key;
     },
     [getLocale],

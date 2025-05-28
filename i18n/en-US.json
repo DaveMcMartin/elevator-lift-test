@@ -1,1 +1,8 @@
-{}
+{
+  "app_title": "Elevator Lift Test",
+  "no_data_to_display": "No data to display",
+  "acceleration": "Acceleration",
+  "velocity": "Velocity",
+  "jerk": "Jerk",
+  "ambient_noise": "Ambient Noise"
+}

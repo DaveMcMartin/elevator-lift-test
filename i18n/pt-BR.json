@@ -1,3 +1,8 @@
 {
-  "app_title": "Teste Subida do Elevador"
+  "app_title": "Teste Subida do Elevador",
+  "no_data_to_display": "Nenhum dado para exibir",
+  "acceleration": "Aceleração",
+  "velocity": "Velocidade",
+  "jerk": "Trepidação",
+  "ambient_noise": "Ruído"
 }
