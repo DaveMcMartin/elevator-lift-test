@@ -8,7 +8,7 @@ export interface MeasurementItemProps {
 
 const MeasurementItem = ({ label, value }: MeasurementItemProps) => {
   return (
-    <View style={styles.measurementDetails}>
+    <View style={styles.measurementDetails} testID="measurement-container">
       <Text style={styles.measurementLabel}>{label}</Text>
       <Text style={styles.measurementValue}>{value}</Text>
     </View>

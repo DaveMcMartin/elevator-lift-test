@@ -13,7 +13,7 @@ describe("components/Button", () => {
   it("calls onPress when the button is pressed", () => {
     const onPressMock = jest.fn();
     const { getByText } = render(
-      <Button title="Click Me" onPress={onPressMock} />
+      <Button title="Click Me" onPress={onPressMock} />,
     );
     fireEvent.press(getByText("Click Me"));
     expect(onPressMock).toHaveBeenCalled();
@@ -27,25 +27,25 @@ describe("components/Button", () => {
         title="Styled Button"
         style={customButtonStyle}
         textStyle={customTextStyle}
-      />
+      />,
     );
 
     const button = getByTestId("button");
     const text = getByText("Styled Button");
 
-    expect(button.props.style).toContainEqual(customButtonStyle);
-    expect(text.props.style).toContainEqual(customTextStyle);
+    expect(button.props.style).toMatchObject(customButtonStyle);
+    expect(text.props.style[1]).toMatchObject(customTextStyle);
   });
 
   it("applies default styles to the button and text", () => {
     const { getByText, getByTestId } = render(
-      <Button title="Default Button" />
+      <Button title="Default Button" />,
     );
 
     const button = getByTestId("button");
     const text = getByText("Default Button");
 
-    expect(button.props.style).toContainEqual({
+    expect(button.props.style).toMatchObject({
       borderRadius: 24,
       backgroundColor: colors.blue,
       paddingVertical: 12,
@@ -53,11 +53,10 @@ describe("components/Button", () => {
       minWidth: 180,
     });
 
-    expect(text.props.style).toContainEqual({
+    expect(text.props.style[0]).toMatchObject({
       fontSize: 21,
       textAlign: "center",
       color: colors.white,
     });
   });
 });
-```

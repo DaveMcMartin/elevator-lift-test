@@ -18,6 +18,7 @@ const Graph = ({ data }: Props) => {
   if (!data || data.length === 0) {
     return (
       <View
+        testID="no-data-container"
         style={{
           marginTop: 20,
           alignItems: "center",
@@ -88,7 +89,10 @@ const Graph = ({ data }: Props) => {
   };
 
   return (
-    <View style={{ marginTop: 20, alignItems: "center" }}>
+    <View
+      style={{ marginTop: 20, alignItems: "center" }}
+      testID="chart-container"
+    >
       <LineChart
         data={chartData}
         width={Dimensions.get("window").width - 40}
