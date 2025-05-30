@@ -5,7 +5,7 @@
 Este aplicativo mede velocidade, aceleração, tranco (derivada da aceleração) e ruído ambiente de um elevador enquanto ele está em movimento.
 Ele utiliza o acelerômetro e o microfone do dispositivo para coletar e analisar dados em tempo real.
 
-![home](./docs/home-en-us.png)
+![home](./docs/home-pt-br.png)
 
 ## Como Funciona
 
@@ -20,7 +20,7 @@ O aplicativo calcula as seguintes métricas usando os sensores do dispositivo:
    Onde:
 
    - `x, y, z` são os valores brutos do acelerômetro.
-   - `g_{\text{offset}}` é o ajuste de gravidade calibrado no início da medição.
+   - `g offset` é o ajuste de gravidade calibrado no início da medição.
 
 2. **Velocidade**: Calculada pela integração da aceleração ao longo do tempo.
 
@@ -30,8 +30,8 @@ O aplicativo calcula as seguintes métricas usando os sensores do dispositivo:
 
    Onde:
 
-   - `v_0` é a velocidade inicial (assumida como 0).
-   - `\Delta t` é o intervalo de tempo entre as medições.
+   - `v0` é a velocidade inicial (assumida como 0).
+   - `Delta t` é o intervalo de tempo entre as medições.
 
 3. **Tranco**: A taxa de variação da aceleração.
 
@@ -41,7 +41,7 @@ O aplicativo calcula as seguintes métricas usando os sensores do dispositivo:
 
    Onde:
 
-   - `a_0` é o valor anterior da aceleração.
+   - `a0` é o valor anterior da aceleração.
 
 4. **Ruído Ambiente**: Medido em decibéis (dBFS) usando o microfone do dispositivo.
 
