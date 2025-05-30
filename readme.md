@@ -1,6 +1,6 @@
 # Elevator Lift Test
 
-[Português](./read-me.pt-BR.md)
+[Português](./readme.pt-BR.md)
 
 This app measures velocity, acceleration, jerk, and ambient noise of an elevator while it is moving.
 It uses the device's accelerometer and microphone to collect and analyze data in real-time.
