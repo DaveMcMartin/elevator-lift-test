@@ -21,7 +21,10 @@
         "tinted": "./assets/images/ios-tinted.png"
       },
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Este aplicativo precisa de acesso ao microfone para detectar níveis de ruído ambiente durante seus testes de elevador."
+        "NSMicrophoneUsageDescription": "Este aplicativo precisa de acesso ao microfone para detectar níveis de ruído ambiente durante seus testes de elevador.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "Este aplicativo não coleta dados de usuário nem utiliza rastreamento",
+        "ITSEncryptionExportComplianceCode": "APP-EXEMPT"
       }
     },
     "android": {

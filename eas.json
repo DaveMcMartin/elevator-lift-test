@@ -8,12 +8,24 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
+      "distribution": "internal"
+    },
+    "production_android": {
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
       }
     },
-    "production": {}
+    "production_android_bundle": {
+      "android": {
+        "buildType": "aab"
+      }
+    },
+    "production_ios": {
+      "ios": {
+        "simulator": false
+      }
+    }
   },
   "submit": {
     "production": {}
