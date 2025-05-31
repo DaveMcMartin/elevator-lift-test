@@ -1,79 +1,85 @@
-name: Build and Release Signed APK
+name: Build & Attach Signed APK
 
 on:
   release:
     types: [created]
 
 jobs:
-  build-android-apk:
+  build-android:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - name: Checkout code
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
-      - name: Install dependencies
+      - name: Install npm dependencies
         run: npm ci
 
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
+      - name: Install Expo CLI globally
+        run: npm install --global expo-cli
 
-      - name: Generate Android project
-        run: expo prebuild --clean --platform android
+      - name: Expo -> prebuild Android
+        run: |
+          expo prebuild --clean --platform android
 
-      - name: Setup Java
+      - name: Set up Java (Zulu JDK 11)
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '11'
+          distribution: "zulu"
+          java-version: "11"
 
-      - name: Prepare Android directory
-        run: mkdir -p android/app
-
-      - name: Install keystore
+      - name: Install Android keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/elevator-app.jks
+          mkdir -p android/app
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release-key.jks
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
-      - name: Configure signing
+      - name: Configure Gradle signing properties
         run: |
-          echo "MYAPP_RELEASE_STORE_FILE=elevator-app.jks" >> android/gradle.properties
-          echo "MYAPP_RELEASE_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/gradle.properties
-          echo "MYAPP_RELEASE_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> android/gradle.properties
-          echo "MYAPP_RELEASE_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/gradle.properties
+          echo "MYAPP_RELEASE_STORE_FILE=release-key.jks"       >> android/gradle.properties
+          echo "MYAPP_RELEASE_KEY_ALIAS=${ANDROID_KEY_ALIAS}"   >> android/gradle.properties
+          echo "MYAPP_RELEASE_STORE_PASSWORD=${ANDROID_KEYSTORE_PASSWORD}" >> android/gradle.properties
+          echo "MYAPP_RELEASE_KEY_PASSWORD=${ANDROID_KEY_PASSWORD}"       >> android/gradle.properties
+        env:
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Build signed APK
+      - name: Build signed Android APK via Gradle
         run: |
           cd android
+          ./gradlew clean
+          # this will produce: android/app/build/outputs/apk/release/app-release.apk
           ./gradlew assembleRelease
 
       - name: Verify APK signature
         run: |
           jarsigner -verify -verbose -certs android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: elevator-app-signed
-          path: android/app/build/outputs/apk/release/app-release.apk
-
-  attach-to-release:
-    needs: build-android-apk
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download APK artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: elevator-app-signed
-          path: dist
-
-      - name: Attach APK to Release
+      - name: Download existing release metadata
+        id: get_release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/app-release.apk
+          tag_name: ${{ github.event.release.tag_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK as a release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: android/app/build/outputs/apk/release/app-release.apk
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

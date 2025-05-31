@@ -15,6 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "net.davidmartins.elevatorlifttest",
       "icon": {
         "dark": "./assets/images/ios-dark.png",
         "light": "./assets/images/ios-light.png",
