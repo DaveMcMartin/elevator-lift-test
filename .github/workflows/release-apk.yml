@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Install EAS CLI
-        run: npm install --global eas-cli@^4
+        run: npm install --global eas-cli@latest
 
       - name: Start EAS Build (Android APK)
         id: eas_build
