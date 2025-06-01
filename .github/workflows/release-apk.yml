@@ -1,4 +1,4 @@
-name: Build & Attach Signed APK
+name: Build & Attach Signed APK via EAS
 
 on:
   release:
@@ -8,72 +8,52 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 17 (Temurin)
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "17"
-
-      - name: Verify Java version
-        run: java -version
-
-      - name: Set up Node.js (v18)
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "npm"
 
-      - name: Install npm dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Install Expo CLI
-        run: npm install --global expo-cli
+      - name: Install EAS CLI globally
+        run: npm install --global eas-cli@^4
 
-      - name: Expo → prebuild Android
+      - name: Expo login
         run: |
-          expo prebuild --clean --platform android
-
-      - name: Decode Android keystore from Secrets
-        run: |
-          mkdir -p android/app
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release-key.jks
+          eas login --token "$EXPO_TOKEN"
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Configure Gradle signing properties
+      - name: Start EAS Build (Android APK)
+        id: eas_build
         run: |
-          cat <<EOF >> android/gradle.properties
-          MYAPP_RELEASE_STORE_FILE=release-key.jks
-          MYAPP_RELEASE_KEY_ALIAS=${ANDROID_KEY_ALIAS}
-          MYAPP_RELEASE_STORE_PASSWORD=${ANDROID_KEYSTORE_PASSWORD}
-          MYAPP_RELEASE_KEY_PASSWORD=${ANDROID_KEY_PASSWORD}
-          EOF
-        env:
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          eas build \
+            --platform android \
+            --profile production_android \
+            --non-interactive \
+            --json > _build_info.json
 
-      - name: Build signed APK via Gradle
+      # { "artifacts": { "url": "https://expo-builds.s3.amazonaws.com/…/app.apk" }, … }
+      - name: Extract APK URL
+        id: extract_url
         run: |
-          cd android
-          ./gradlew clean
-          ./gradlew assembleRelease
+          APK_URL=$(jq -r '.artifacts.url' < _build_info.json)
+          echo "APK_URL=$APK_URL" >> $GITHUB_OUTPUT
 
-      - name: Verify APK signature
+      - name: Download APK artifact
         run: |
-          jarsigner -verify -verbose -certs android/app/build/outputs/apk/release/app-release.apk
+          echo "Downloading from ${{ steps.extract_url.outputs.APK_URL }}"
+          curl -L --fail -o app-release.apk "${{ steps.extract_url.outputs.APK_URL }}"
 
       - name: Upload APK to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: android/app/build/outputs/apk/release/app-release.apk
+          files: app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
