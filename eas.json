@@ -17,7 +17,7 @@
     },
     "production_android_bundle": {
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     },
     "production_ios": {
