@@ -39,7 +39,7 @@ jobs:
       - name: Extract APK URL
         id: extract_url
         run: |
-          APK_URL=$(jq -r '[0].artifacts.buildUrl' < _build_info.json)
+          APK_URL=$(jq -r '.[0].artifacts.buildUrl' < _build_info.json)
           echo "APK_URL=$APK_URL" >> $GITHUB_OUTPUT
 
       - name: Download APK artifact
