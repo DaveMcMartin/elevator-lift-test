@@ -36,13 +36,10 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Output _build_info.json content
-        run: cat _build_info.json
-
       - name: Extract APK URL
         id: extract_url
         run: |
-          APK_URL=$(jq -r '.artifacts[0].buildUrl' < _build_info.json)
+          APK_URL=$(jq -r '[0].artifacts.buildUrl' < _build_info.json)
           echo "APK_URL=$APK_URL" >> $GITHUB_OUTPUT
 
       - name: Download APK artifact
