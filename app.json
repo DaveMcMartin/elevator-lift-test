@@ -21,6 +21,10 @@
         "light": "./assets/images/ios-light.png",
         "tinted": "./assets/images/ios-tinted.png"
       },
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Este aplicativo precisa de acesso ao microfone para detectar níveis de ruído ambiente durante seus testes de elevador.",
         "ITSAppUsesNonExemptEncryption": false,
@@ -33,6 +37,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "versionCode": 1,
       "package": "net.davidmartins.elevatorlifttest",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
@@ -41,6 +46,7 @@
       "eas": {
         "projectId": "c79cb140-e86b-4569-977e-b53ece8b1688"
       }
-    }
+    },
+    "owner": "neomot"
   }
 }
