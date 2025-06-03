@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="4" failures="2" errors="0" time="4.297">
+  <testsuite name="components/Graph" errors="0" failures="2" skipped="0" timestamp="2025-06-03T21:07:58" time="4.258" tests="4">
+    <testcase classname="components/Graph renders a message when no data is provided" name="components/Graph renders a message when no data is provided" time="1.137">
+    </testcase>
+    <testcase classname="components/Graph renders the LineChart when data is provided" name="components/Graph renders the LineChart when data is provided" time="0.027">
+    </testcase>
+    <testcase classname="components/Graph reduces data points when exceeding MAX_POINTS_TO_DISPLAY" name="components/Graph reduces data points when exceeding MAX_POINTS_TO_DISPLAY" time="0.089">
+      <failure>Error: expect(received).toBeLessThanOrEqual(expected)
+
+Expected: &lt;= 14
+Received:    44
+    at Object.toBeLessThanOrEqual (/Users/davidmartins/Projects/elevator-lift-test/components/Graph.test.tsx:41:27)
+    at Promise.then.completed (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:316:40)
+    at _runTest (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:121:9)
+    at run (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+    <testcase classname="components/Graph handles a single data point" name="components/Graph handles a single data point" time="0.011">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 1
+Received: 4
+    at Object.toBe (/Users/davidmartins/Projects/elevator-lift-test/components/Graph.test.tsx:61:31)
+    at Promise.then.completed (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:316:40)
+    at _runTest (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:121:9)
+    at run (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/Users/davidmartins/Projects/elevator-lift-test/node_modules/jest-runner/build/runTest.js:444:34)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

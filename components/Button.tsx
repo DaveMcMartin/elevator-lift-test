@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.blue,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    minWidth: 180,
+    minWidth: 140,
   },
   text: {
     fontSize: 21,

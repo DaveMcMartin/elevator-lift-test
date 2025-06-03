@@ -282,10 +282,7 @@ const HomeScreen = () => {
       Alert.alert(L("device_motion_unavailable"));
       return;
     }
-    const audioPermitted = await requestAudioPermissions();
-    if (!audioPermitted) {
-      return;
-    }
+    await requestAudioPermissions();
     await calibrateGravity();
 
     historyRef.current = [];
@@ -370,15 +367,15 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{L("app_title")}</Text>
 
-      <ViewShot
-        ref={viewShotRef}
-        options={{ format: "jpg", result: "tmpfile" }}
-        style={styles.viewShot}
+      <ScrollView
+        style={{ width: "100%" }}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          style={{ width: "100%" }}
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
+        <ViewShot
+          ref={viewShotRef}
+          options={{ format: "jpg", result: "tmpfile" }}
+          style={styles.viewShot}
         >
           <View
             style={[
@@ -438,8 +435,8 @@ const HomeScreen = () => {
               )}
             </View>
           )}
-        </ScrollView>
-      </ViewShot>
+        </ViewShot>
+      </ScrollView>
     </SafeAreaView>
   );
 };
