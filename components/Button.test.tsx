@@ -50,7 +50,7 @@ describe("components/Button", () => {
       backgroundColor: colors.blue,
       paddingVertical: 12,
       paddingHorizontal: 24,
-      minWidth: 180,
+      minWidth: 140,
     });
 
     expect(text.props.style[0]).toMatchObject({
