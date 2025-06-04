@@ -117,7 +117,7 @@ const Graph = ({ data }: Props) => {
     backgroundColor: "#ffffff",
     backgroundGradientFrom: "#ffffff",
     backgroundGradientTo: "#ffffff",
-    decimalPlaces: 2,
+    decimalPlaces: 4,
     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     propsForDots: {
@@ -137,6 +137,7 @@ const Graph = ({ data }: Props) => {
     },
   };
   const chartWidth = Dimensions.get("window").width - 80;
+  const chartHeight = chartWidth * 0.7;
 
   return (
     <View
@@ -148,8 +149,8 @@ const Graph = ({ data }: Props) => {
         <LineChart
           data={accelerationData}
           width={chartWidth}
-          height={120}
-          yAxisSuffix=" m/s²"
+          height={chartHeight}
+          yAxisSuffix=""
           yAxisInterval={1}
           chartConfig={chartConfig}
           bezier
@@ -165,8 +166,8 @@ const Graph = ({ data }: Props) => {
         <LineChart
           data={velocityData}
           width={chartWidth}
-          height={120}
-          yAxisSuffix=" m/s"
+          height={chartHeight}
+          yAxisSuffix=""
           yAxisInterval={1}
           chartConfig={chartConfig}
           bezier
@@ -182,8 +183,8 @@ const Graph = ({ data }: Props) => {
         <LineChart
           data={jerkData}
           width={chartWidth}
-          height={120}
-          yAxisSuffix=" m/s³"
+          height={chartHeight}
+          yAxisSuffix=""
           yAxisInterval={1}
           chartConfig={chartConfig}
           bezier
@@ -201,8 +202,8 @@ const Graph = ({ data }: Props) => {
             <LineChart
               data={noiseData}
               width={chartWidth}
-              height={120}
-              yAxisSuffix=" dBFS"
+              height={chartHeight}
+              yAxisSuffix=""
               yAxisInterval={1}
               chartConfig={chartConfig}
               bezier

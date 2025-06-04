@@ -26,7 +26,6 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Este aplicativo precisa de acesso ao microfone para detectar níveis de ruído ambiente durante seus testes de elevador.",
         "ITSAppUsesNonExemptEncryption": false,
         "NSUserTrackingUsageDescription": "Este aplicativo não coleta dados de usuário nem utiliza rastreamento",
         "ITSEncryptionExportComplianceCode": "APP-EXEMPT"
@@ -41,7 +40,15 @@
       "package": "net.davidmartins.elevatorlifttest",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
-    "plugins": ["expo-localization"],
+    "plugins": [
+      "expo-localization",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Este aplicativo precisa de acesso ao microfone para detectar níveis de ruído ambiente durante seus testes de elevador."
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "c79cb140-e86b-4569-977e-b53ece8b1688"
