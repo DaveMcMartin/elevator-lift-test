@@ -4,6 +4,7 @@ import { MovingDataFrame } from "../screens/HomeScreen";
 import { colors } from "../constants/colors";
 import { formatDuration } from "../utils/number";
 import { useI18n } from "../i18n/useI18n";
+import { LineChartProps } from "react-native-chart-kit/dist/line-chart/LineChart";
 
 const MAX_POINTS_TO_DISPLAY = 75;
 const NUM_X_AXIS_LABELS = 5;
@@ -67,7 +68,7 @@ const Graph = ({ data }: Props) => {
       {
         data: processedData.map((d) => d.acceleration),
         strokeWidth: 2,
-        color: () => colors.deepBlue,
+        color: () => colors.orange,
       },
     ],
     legend: [L("acceleration")],
@@ -97,19 +98,22 @@ const Graph = ({ data }: Props) => {
     legend: [L("jerk")],
   };
 
-  const noiseData = {
-    labels: chartXTickLabels,
-    datasets: [
-      {
-        data: processedData.map((d) => d.ambientNoise ?? 0),
-        strokeWidth: 2,
-        color: () => colors.pink,
-      },
-    ],
-    legend: [L("ambient_noise")],
-  };
+  const hasNoiseData = processedData.some((d) => d.ambientNoise !== undefined);
+  const noiseData = hasNoiseData
+    ? {
+        labels: chartXTickLabels,
+        datasets: [
+          {
+            data: processedData.map((d) => d.ambientNoise ?? 0),
+            strokeWidth: 2,
+            color: () => colors.pink,
+          },
+        ],
+        legend: [L("ambient_noise")],
+      }
+    : null;
 
-  const chartConfig = {
+  const chartConfig: LineChartProps["chartConfig"] = {
     backgroundColor: "#ffffff",
     backgroundGradientFrom: "#ffffff",
     backgroundGradientTo: "#ffffff",
@@ -125,6 +129,12 @@ const Graph = ({ data }: Props) => {
       strokeDasharray: "",
       stroke: "rgba(0,0,0,0.1)",
     },
+    propsForVerticalLabels: {
+      fontSize: "11",
+    },
+    propsForHorizontalLabels: {
+      fontSize: "11",
+    },
   };
   const chartWidth = Dimensions.get("window").width - 80;
 
@@ -133,7 +143,7 @@ const Graph = ({ data }: Props) => {
       style={{ marginTop: 20, alignItems: "center" }}
       testID="chart-container"
     >
-      <Text style={styles.chartTitleDeepBlue}>{L("acceleration")} (m/s²)</Text>
+      <Text style={styles.chartTitleOrange}>{L("acceleration")} (m/s²)</Text>
       <View style={styles.chartContainer}>
         <LineChart
           data={accelerationData}
@@ -184,22 +194,26 @@ const Graph = ({ data }: Props) => {
         />
       </View>
 
-      <Text style={styles.chartTitlePink}>{L("ambient_noise")} (dBFS)</Text>
-      <View style={styles.chartContainer}>
-        <LineChart
-          data={noiseData}
-          width={chartWidth}
-          height={120}
-          yAxisSuffix=" dBFS"
-          yAxisInterval={1}
-          chartConfig={chartConfig}
-          bezier
-          style={styles.chartStyle}
-          segments={4}
-          fromZero={false}
-          withShadow={false}
-        />
-      </View>
+      {hasNoiseData && noiseData && (
+        <>
+          <Text style={styles.chartTitlePink}>{L("ambient_noise")} (dBFS)</Text>
+          <View style={styles.chartContainer}>
+            <LineChart
+              data={noiseData}
+              width={chartWidth}
+              height={120}
+              yAxisSuffix=" dBFS"
+              yAxisInterval={1}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chartStyle}
+              segments={4}
+              fromZero={false}
+              withShadow={false}
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 };
@@ -216,8 +230,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.white,
   },
-  chartTitleDeepBlue: {
-    color: colors.deepBlue,
+  chartTitleOrange: {
+    color: colors.orange,
     marginBottom: 5,
   },
   chartTitleBlue: {
