@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="22" failures="0" errors="0" time="2.941">
+  <testsuite name="utils/number" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="0.559" tests="6">
+    <testcase classname="utils/number avg calculates the average of a non-empty array" name="utils/number avg calculates the average of a non-empty array" time="0.007">
+    </testcase>
+    <testcase classname="utils/number avg returns NaN for an empty array" name="utils/number avg returns NaN for an empty array" time="0.001">
+    </testcase>
+    <testcase classname="utils/number formatDuration formats seconds correctly" name="utils/number formatDuration formats seconds correctly" time="0.004">
+    </testcase>
+    <testcase classname="utils/number formatDuration formats minutes and seconds" name="utils/number formatDuration formats minutes and seconds" time="0">
+    </testcase>
+    <testcase classname="utils/number formatDuration formats hours, minutes, and seconds" name="utils/number formatDuration formats hours, minutes, and seconds" time="0.006">
+    </testcase>
+    <testcase classname="utils/number formatDuration handles negative values" name="utils/number formatDuration handles negative values" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="i18n/useI18n" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="0.606" tests="1">
+    <testcase classname="i18n/useI18n should get the app name" name="i18n/useI18n should get the app name" time="0.011">
+    </testcase>
+  </testsuite>
+  <testsuite name="utils/helper" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="0.662" tests="3">
+    <testcase classname="utils/helper sleep resolves after the specified time" name="utils/helper sleep resolves after the specified time" time="0.104">
+    </testcase>
+    <testcase classname="utils/helper sleep resolves immediately for zero milliseconds" name="utils/helper sleep resolves immediately for zero milliseconds" time="0.001">
+    </testcase>
+    <testcase classname="utils/helper sleep resolves immediately for negative milliseconds" name="utils/helper sleep resolves immediately for negative milliseconds" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="components/MeasurementItem" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="0.954" tests="2">
+    <testcase classname="components/MeasurementItem renders the label and value correctly" name="components/MeasurementItem renders the label and value correctly" time="0.289">
+    </testcase>
+    <testcase classname="components/MeasurementItem applies the correct styles to the container, label, and value" name="components/MeasurementItem applies the correct styles to the container, label, and value" time="0.008">
+    </testcase>
+  </testsuite>
+  <testsuite name="components/Button" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="0.962" tests="4">
+    <testcase classname="components/Button renders the button with the correct title" name="components/Button renders the button with the correct title" time="0.308">
+    </testcase>
+    <testcase classname="components/Button calls onPress when the button is pressed" name="components/Button calls onPress when the button is pressed" time="0.011">
+    </testcase>
+    <testcase classname="components/Button applies custom styles to the button and text" name="components/Button applies custom styles to the button and text" time="0.004">
+    </testcase>
+    <testcase classname="components/Button applies default styles to the button and text" name="components/Button applies default styles to the button and text" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="components/Graph" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="1.189" tests="4">
+    <testcase classname="components/Graph renders a message when no data is provided" name="components/Graph renders a message when no data is provided" time="0.13">
+    </testcase>
+    <testcase classname="components/Graph renders the LineChart when data is provided" name="components/Graph renders the LineChart when data is provided" time="0.03">
+    </testcase>
+    <testcase classname="components/Graph reduces data points when exceeding MAX_POINTS_TO_DISPLAY" name="components/Graph reduces data points when exceeding MAX_POINTS_TO_DISPLAY" time="0.088">
+    </testcase>
+    <testcase classname="components/Graph handles a single data point for each graph item" name="components/Graph handles a single data point for each graph item" time="0.019">
+    </testcase>
+  </testsuite>
+  <testsuite name="screens/HomeScreen" errors="0" failures="0" skipped="0" timestamp="2025-06-04T19:12:55" time="2.68" tests="2">
+    <testcase classname="screens/HomeScreen renders without errors" name="screens/HomeScreen renders without errors" time="0.113">
+    </testcase>
+    <testcase classname="screens/HomeScreen toggles measuring state when start/stop buttons are pressed" name="screens/HomeScreen toggles measuring state when start/stop buttons are pressed" time="1.234">
+    </testcase>
+  </testsuite>
+</testsuites>

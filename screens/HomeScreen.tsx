@@ -17,7 +17,7 @@ import {
   Alert,
 } from "react-native";
 import { DeviceMotion, DeviceMotionMeasurement } from "expo-sensors";
-import { Audio } from "expo-av";
+import { useAudioRecorder, AudioModule, RecordingPresets } from "expo-audio";
 import { colors } from "../constants/colors";
 import Button from "../components/Button";
 import MeasurementItem from "../components/MeasurementItem";
@@ -60,11 +60,15 @@ const HomeScreen = () => {
   } | null>(null);
   const isMeasuringRef = useRef(isMeasuring);
   const lastSummaryUpdateTimeRef = useRef<number>(0);
+  const hasAudioPermission = useRef<boolean>(false);
   const [showButtons, setShowButtons] = useState(true);
   const viewShotRef = useRef<ViewShot>(null);
   const gravityOffsetRef = useRef<number>(0);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [decibels, setDecibels] = useState<number | null>(null);
+  const audioRecorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true,
+    extension: ".mp3",
+  });
 
   const calculateSummaryFromHistory = (
     history: MovingDataFrame[],
@@ -107,10 +111,6 @@ const HomeScreen = () => {
     };
   };
 
-  useEffect(() => {
-    isMeasuringRef.current = isMeasuring;
-  }, [isMeasuring]);
-
   const handleDeviceMotion = useCallback(
     (motion: DeviceMotionMeasurement) => {
       if (!isMeasuringRef.current || !lastCalculatedFrameRef.current) {
@@ -144,6 +144,18 @@ const HomeScreen = () => {
         : prevVelocity + prevAcceleration * dt;
       const currentJerk = (currentAcceleration - prevAcceleration) / dt;
 
+      let decibels: number | undefined = undefined;
+      if (hasAudioPermission.current) {
+        try {
+          const status = audioRecorder.getStatus();
+          if (status.metering !== null && status.metering !== undefined) {
+            decibels = status.metering;
+          }
+        } catch (error) {
+          console.warn("Error getting audio metering:", error);
+        }
+      }
+
       const newFrame: MovingDataFrame = {
         acceleration: currentAcceleration,
         velocity: currentVelocity,
@@ -176,7 +188,7 @@ const HomeScreen = () => {
         lastSummaryUpdateTimeRef.current = currentTime;
       }
     },
-    [decibels],
+    [audioRecorder],
   );
 
   const subscribeToMotion = () => {
@@ -193,10 +205,13 @@ const HomeScreen = () => {
   };
 
   const requestAudioPermissions = async () => {
-    const { status } = await Audio.requestPermissionsAsync();
-    if (status === "granted") {
+    const status = await AudioModule.requestRecordingPermissionsAsync();
+    if (status.granted) {
+      hasAudioPermission.current = true;
       return true;
     }
+
+    hasAudioPermission.current = false;
     Alert.alert(L("permission_required"), L("audio_permission_needed"));
     return false;
   };
@@ -208,43 +223,10 @@ const HomeScreen = () => {
     }
 
     try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const recordingOptions: Audio.RecordingOptions = {
+      await audioRecorder.prepareToRecordAsync({
         isMeteringEnabled: true,
-        android: {
-          extension: ".m4a",
-          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-          audioEncoder: Audio.AndroidAudioEncoder.AAC,
-          sampleRate: 44100,
-          numberOfChannels: 1,
-          bitRate: 128000,
-        },
-        ios: {
-          extension: ".m4a",
-          outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
-          sampleRate: 22050,
-          numberOfChannels: 1,
-          bitRate: 32000,
-          audioQuality: 0.6,
-        },
-        web: {},
-      };
-
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        recordingOptions,
-        (status: Audio.RecordingStatus) => {
-          if (status.isRecording && status.metering !== undefined) {
-            setDecibels(status.metering);
-          }
-        },
-        500,
-      );
-      setRecording(newRecording);
-      await newRecording.startAsync();
+      });
+      audioRecorder.record();
     } catch (err) {
       console.error("Failed to start audio recording for metering", err);
       Alert.alert(L("audio_error"), L("audio_metering_failed"));
@@ -252,14 +234,13 @@ const HomeScreen = () => {
   };
 
   const stopAudioMetering = async () => {
-    if (recording) {
+    if (audioRecorder.isRecording) {
       try {
-        await recording.stopAndUnloadAsync();
+        await audioRecorder.stop();
       } catch (error) {
         console.error("Error stopping audio metering:", error);
       }
     }
-    setRecording(null);
   };
 
   const calibrateGravity = async () => {
@@ -282,15 +263,11 @@ const HomeScreen = () => {
       Alert.alert(L("device_motion_unavailable"));
       return;
     }
-    const audioPermitted = await requestAudioPermissions();
-    if (!audioPermitted) {
-      return;
-    }
+    await requestAudioPermissions();
     await calibrateGravity();
 
     historyRef.current = [];
     setSummary(null);
-    setDecibels(null);
     setIsMeasuring(true);
 
     const initialTimestamp = Date.now();
@@ -321,15 +298,15 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
+    isMeasuringRef.current = isMeasuring;
+  }, [isMeasuring]);
+
+  useEffect(() => {
     return () => {
       unsubscribeFromMotion();
-      if (recording) {
-        recording
-          .stopAndUnloadAsync()
-          .catch((e) => console.error("Cleanup error on unmount", e));
-      }
+      audioRecorder.stop();
     };
-  }, [recording]);
+  }, []);
 
   const onPressShare = async () => {
     if (!viewShotRef.current) {
@@ -370,15 +347,19 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{L("app_title")}</Text>
 
-      <ViewShot
-        ref={viewShotRef}
-        options={{ format: "jpg", result: "tmpfile" }}
-        style={styles.viewShot}
+      <ScrollView
+        style={{ width: "100%" }}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          style={{ width: "100%" }}
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
+        <ViewShot
+          ref={viewShotRef}
+          style={styles.viewShot}
+          options={{
+            format: "jpg",
+            quality: 0.8,
+            result: "tmpfile",
+          }}
         >
           <View
             style={[
@@ -438,8 +419,8 @@ const HomeScreen = () => {
               )}
             </View>
           )}
-        </ScrollView>
-      </ViewShot>
+        </ViewShot>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -501,7 +482,6 @@ const styles = StyleSheet.create({
   },
   viewShot: {
     width: "100%",
-    flex: 1,
   },
 });
 

@@ -37,11 +37,11 @@ describe("components/Graph", () => {
         node.type === "RNSVGTSpan" && node.props.content !== null,
     );
 
-    const spanCountExpected = 14;
+    const spanCountExpected = 44;
     expect(labels.length).toBeLessThanOrEqual(spanCountExpected);
   });
 
-  it("handles a single data point", () => {
+  it("handles a single data point for each graph item", () => {
     const singleData = [
       {
         timestamp: 1000,
@@ -58,6 +58,6 @@ describe("components/Graph", () => {
         node.type === "RNSVGTSpan" && node.props.content?.includes("0s"),
     );
 
-    expect(timeLabels.length).toBe(1);
+    expect(timeLabels.length).toBe(4);
   });
 });

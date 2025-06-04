@@ -16,19 +16,24 @@ jest.mock("expo-sensors", () => ({
   },
 }));
 
-jest.mock("expo-av", () => ({
-  Audio: {
-    requestPermissionsAsync: jest.fn(() =>
-      Promise.resolve({ status: "granted" }),
-    ),
-    setAudioModeAsync: jest.fn(),
-    Recording: {
-      createAsync: jest.fn(() =>
-        Promise.resolve({ recording: { stopAndUnloadAsync: jest.fn() } }),
+jest.mock("expo-audio", () => {
+  return {
+    RecordingPresets: {
+      HIGH_QUALITY: {},
+    },
+    AudioModule: {
+      requestRecordingPermissionsAsync: jest.fn(() =>
+        Promise.resolve({ granted: true }),
       ),
     },
-  },
-}));
+    useAudioRecorder: jest.fn(() => ({
+      prepareToRecordAsync: jest.fn().mockResolvedValue(true),
+      record: jest.fn(),
+      stop: jest.fn().mockResolvedValue(true),
+      getStatus: jest.fn(() => ({ metering: 0 })),
+    })),
+  };
+});
 
 describe("screens/HomeScreen", () => {
   it("renders without errors", () => {
