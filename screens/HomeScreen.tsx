@@ -29,11 +29,11 @@ import { sleep } from "../utils/helper";
 import { useI18n } from "../i18n/useI18n";
 
 export type MovingDataFrame = {
-  acceleration: number;
-  velocity: number;
-  jerk: number;
-  timestamp: number;
-  ambientNoise?: number;
+  acceleration: number; // vertical acceleration (m/s²)
+  velocity: number; // vertical velocity (m/s)
+  jerk: number; // rate of change of vertical acceleration (m/s³)
+  timestamp: number; // epoch ms
+  ambientNoise?: number; // dBFS
 };
 export type MeasurementSummary = {
   avgAcceleration: number;
@@ -63,7 +63,6 @@ const HomeScreen = () => {
   const hasAudioPermission = useRef<boolean>(false);
   const [showButtons, setShowButtons] = useState(true);
   const viewShotRef = useRef<ViewShot>(null);
-  const gravityOffsetRef = useRef<number>(0);
   const audioRecorder = useAudioRecorder({
     ...RecordingPresets.HIGH_QUALITY,
     isMeteringEnabled: true,
@@ -120,29 +119,51 @@ const HomeScreen = () => {
       const currentTime = Date.now();
       const dt =
         (currentTime - lastCalculatedFrameRef.current.timestamp) / 1000;
-
       if (dt <= 0) {
         lastCalculatedFrameRef.current.timestamp = currentTime;
         return;
       }
-      if (!motion.acceleration) {
+
+      const ag = motion.accelerationIncludingGravity;
+      const a = motion.acceleration;
+      if (!ag || !a) {
         return;
       }
 
-      const { x, y, z } = motion.acceleration;
-      const zCorrected = z - gravityOffsetRef.current;
-      const currentAcceleration = Math.sqrt(
-        x * x + y * y + zCorrected * zCorrected,
-      );
+      // 1) Compute gravity vector: g = totalAccel - rawAccel
+      const gx = ag.x - a.x;
+      const gy = ag.y - a.y;
+      const gz = ag.z - a.z;
 
-      const prevAcceleration = lastCalculatedFrameRef.current.acceleration;
-      const prevVelocity = lastCalculatedFrameRef.current.velocity;
+      // 2) Compute linear acceleration (gravity removed) equals raw a,
+      //    but to be explicit:
+      const ax_lin = a.x;
+      const ay_lin = a.y;
+      const az_lin = a.z;
 
-      const isStationary = currentAcceleration < 0.1;
-      const currentVelocity = isStationary
-        ? 0
-        : prevVelocity + prevAcceleration * dt;
-      const currentJerk = (currentAcceleration - prevAcceleration) / dt;
+      // 3) Normalize gravity vector to get unit direction of “down”
+      const gMag = Math.sqrt(gx * gx + gy * gy + gz * gz);
+      if (gMag === 0) {
+        return; // cannot normalize if magnitude is zero
+      }
+      const gx_u = gx / gMag;
+      const gy_u = gy / gMag;
+      const gz_u = gz / gMag;
+
+      // 4) Project linear acceleration onto gravity direction to isolate vertical accel
+      //    a_vert_raw = ax_lin·gx_u + ay_lin·gy_u + az_lin·gz_u
+      const a_vert_raw = ax_lin * gx_u + ay_lin * gy_u + az_lin * gz_u;
+
+      // 7) Apply a small deadband to avoid drift/noise around zero (<0.05 m/s²)
+      const a_vert = Math.abs(a_vert_raw) < 0.05 ? 0 : a_vert_raw;
+
+      // 8) Integrate vertical acceleration to get vertical velocity
+      const prevFrame = lastCalculatedFrameRef.current;
+      const newVelocity = prevFrame.velocity + a_vert * dt;
+
+      // 9) Compute jerk as change in vertical acceleration over dt
+      const prevAcc = prevFrame.acceleration;
+      const currentJerk = (a_vert - prevAcc) / dt;
 
       let decibels: number | undefined = undefined;
       if (hasAudioPermission.current) {
@@ -157,8 +178,8 @@ const HomeScreen = () => {
       }
 
       const newFrame: MovingDataFrame = {
-        acceleration: currentAcceleration,
-        velocity: currentVelocity,
+        acceleration: a_vert,
+        velocity: newVelocity,
         jerk: currentJerk,
         timestamp: currentTime,
         ambientNoise: decibels === null ? undefined : decibels,
@@ -166,15 +187,14 @@ const HomeScreen = () => {
       historyRef.current.push(newFrame);
 
       lastCalculatedFrameRef.current = {
-        acceleration: currentAcceleration,
-        velocity: currentVelocity,
+        acceleration: a_vert,
+        velocity: newVelocity,
         timestamp: currentTime,
       };
 
       const shouldUpdateSummaryNow = historyRef.current.length === 1;
       const timeForScheduledUpdatePassed =
         currentTime - lastSummaryUpdateTimeRef.current >= 1000;
-
       if (
         (timeForScheduledUpdatePassed && historyRef.current.length > 0) ||
         shouldUpdateSummaryNow
@@ -192,7 +212,7 @@ const HomeScreen = () => {
   );
 
   const subscribeToMotion = () => {
-    DeviceMotion.setUpdateInterval(100);
+    DeviceMotion.setUpdateInterval(500);
     const sub = DeviceMotion.addListener(handleDeviceMotion);
     setSubscription(sub);
   };
@@ -210,7 +230,6 @@ const HomeScreen = () => {
       hasAudioPermission.current = true;
       return true;
     }
-
     hasAudioPermission.current = false;
     Alert.alert(L("permission_required"), L("audio_permission_needed"));
     return false;
@@ -221,7 +240,6 @@ const HomeScreen = () => {
     if (!granted) {
       return;
     }
-
     try {
       await audioRecorder.prepareToRecordAsync({
         isMeteringEnabled: true,
@@ -243,20 +261,6 @@ const HomeScreen = () => {
     }
   };
 
-  const calibrateGravity = async () => {
-    let zSum = 0;
-    let count = 0;
-    const calibrationListener = DeviceMotion.addListener((motion) => {
-      if (motion.acceleration) {
-        zSum += motion.acceleration.z;
-        count += 1;
-      }
-    });
-    await sleep(1000);
-    calibrationListener.remove();
-    gravityOffsetRef.current = count > 0 ? zSum / count : 0;
-  };
-
   const startMeasuring = async () => {
     const isMotionAvailable = await DeviceMotion.isAvailableAsync();
     if (!isMotionAvailable) {
@@ -264,7 +268,6 @@ const HomeScreen = () => {
       return;
     }
     await requestAudioPermissions();
-    await calibrateGravity();
 
     historyRef.current = [];
     setSummary(null);
