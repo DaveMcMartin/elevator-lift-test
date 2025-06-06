@@ -130,18 +130,18 @@ const HomeScreen = () => {
         return;
       }
 
-      // 1) Compute gravity vector: g = totalAccel - rawAccel
+      // 1. compute gravity vector: g = totalAccel - rawAccel
       const gx = ag.x - a.x;
       const gy = ag.y - a.y;
       const gz = ag.z - a.z;
 
-      // 2) Compute linear acceleration (gravity removed) equals raw a,
+      // 2. compute linear acceleration (gravity removed) equals raw a,
       //    but to be explicit:
       const ax_lin = a.x;
       const ay_lin = a.y;
       const az_lin = a.z;
 
-      // 3) Normalize gravity vector to get unit direction of “down”
+      // 3. normalize gravity vector to get unit direction of “down”
       const gMag = Math.sqrt(gx * gx + gy * gy + gz * gz);
       if (gMag === 0) {
         return; // cannot normalize if magnitude is zero
@@ -150,18 +150,18 @@ const HomeScreen = () => {
       const gy_u = gy / gMag;
       const gz_u = gz / gMag;
 
-      // 4) Project linear acceleration onto gravity direction to isolate vertical accel
+      // 4. project linear acceleration onto gravity direction to isolate vertical accel
       //    a_vert_raw = ax_lin·gx_u + ay_lin·gy_u + az_lin·gz_u
       const a_vert_raw = ax_lin * gx_u + ay_lin * gy_u + az_lin * gz_u;
 
-      // 7) Apply a small deadband to avoid drift/noise around zero (<0.05 m/s²)
+      // 7. apply a small deadband to avoid drift/noise around zero (<0.05 m/s²)
       const a_vert = Math.abs(a_vert_raw) < 0.05 ? 0 : a_vert_raw;
 
-      // 8) Integrate vertical acceleration to get vertical velocity
+      // 8. integrate vertical acceleration to get vertical velocity
       const prevFrame = lastCalculatedFrameRef.current;
       const newVelocity = prevFrame.velocity + a_vert * dt;
 
-      // 9) Compute jerk as change in vertical acceleration over dt
+      // 9. compute jerk as change in vertical acceleration over dt
       const prevAcc = prevFrame.acceleration;
       const currentJerk = (a_vert - prevAcc) / dt;
 
