@@ -18,23 +18,23 @@ The app calculates the following metrics using the device's sensors:
 
     The vertical acceleration ($a_{\text{vert}}$) is conceptually calculated as the dot product of the linear acceleration vector ($\vec{a}_{\text{lin}}$) and the normalized gravity vector ($\hat{g}$).
 
-    ($a_{\text{vert}} = \vec{a}_{\text{lin}} \cdot \hat{g}$)
+    $a_{\text{vert}} = \vec{a}_{\text{lin}} \cdot \hat{g}$
 
 2.  **Velocity**: This represents the **vertical velocity**, which is calculated by numerically integrating the vertical acceleration over the time interval between measurements.
 
     $v = v_{\text{prev}} + a_{\text{vert}} \cdot \Delta t$
 
     Where:
-    - `$v_{\text{prev}}$` is the velocity from the previous measurement.
-    - `$a_{\text{vert}}$` is the current vertical acceleration.
-    - `$\Delta t$` is the elapsed time since the last measurement.
+    - $v_{\text{prev}}$ is the velocity from the previous measurement.
+    - $a_{\text{vert}}$ is the current vertical acceleration.
+    - $\Delta t$ is the elapsed time since the last measurement.
 
 3.  **Jerk**: This is the rate of change of **vertical acceleration**, which quantifies the smoothness of the elevator's motion.
 
     $j = \frac{a_{\text{vert}} - a_{\text{vert, prev}}}{\Delta t}$
 
     Where:
-    - `$a_{\text{vert, prev}}$` is the vertical acceleration from the previous measurement.
+    - $a_{\text{vert, prev}}$ is the vertical acceleration from the previous measurement.
 
 4.  **Ambient Noise**: Measures the volume of ambient sound inside the elevator using the device's microphone. The measurement is provided in **decibels relative to full scale (dBFS)**, which indicates the amplitude of the audio signal compared to the maximum possible level the device can handle.
 
