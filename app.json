@@ -47,6 +47,12 @@
         {
           "microphonePermission": "Este aplicativo precisa de acesso ao microfone para detectar níveis de ruído ambiente durante seus testes de elevador."
         }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Este aplicativo precisa de permissão para usar o acelerômetro e medir o deslocamento do elevador."
+        }
       ]
     ],
     "extra": {

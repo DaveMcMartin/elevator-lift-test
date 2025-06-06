@@ -11,39 +11,32 @@ It uses the device's accelerometer and microphone to collect and analyze data in
 
 The app calculates the following metrics using the device's sensors:
 
-1. **Acceleration**: Derived from the accelerometer data (x, y, z axes).
+1.  **Acceleration**: The app isolates the **vertical acceleration** (movement along the direction of gravity). It works by:
+    * Determining the precise direction of gravity by comparing the raw acceleration data with the total acceleration (which includes gravity's pull).
+    * Projecting the device's linear acceleration onto this calculated direction of gravity. This filters out horizontal motion and isolates the true vertical acceleration of the elevator.
+    * A small deadband is applied to the final value to prevent sensor noise from causing drift when the elevator is stationary.
 
-   ```math
-   a = \sqrt{x^2 + y^2 + (z - g_{\text{offset}})^2}
-   ```
+    The vertical acceleration ($a_{\text{vert}}$) is conceptually calculated as the dot product of the linear acceleration vector ($\vec{a}_{\text{lin}}$) and the normalized gravity vector ($\hat{g}$).
 
-   Where:
+    $a_{\text{vert}} = \vec{a}_{\text{lin}} \cdot \hat{g}$
 
-   - `x, y, z` are the raw accelerometer values.
-   - `g_{\text{offset}}` is the gravity offset calibrated at the start of measurement.
+2.  **Velocity**: This represents the **vertical velocity**, which is calculated by numerically integrating the vertical acceleration over the time interval between measurements.
 
-2. **Velocity**: Calculated by integrating acceleration over time.
+    $v = v_{\text{prev}} + a_{\text{vert}} \cdot \Delta t$
 
-   ```math
-   v = v_0 + a \cdot \Delta t
-   ```
+    Where:
+    - $v_{\text{prev}}$ is the velocity from the previous measurement.
+    - $a_{\text{vert}}$ is the current vertical acceleration.
+    - $\Delta t$ is the elapsed time since the last measurement.
 
-   Where:
+3.  **Jerk**: This is the rate of change of **vertical acceleration**, which quantifies the smoothness of the elevator's motion.
 
-   - `v_0` is the initial velocity (assumed to be 0).
-   - `\Delta t` is the time interval between measurements.
+    $j = \frac{a_{\text{vert}} - a_{\text{vert, prev}}}{\Delta t}$
 
-3. **Jerk**: The rate of change of acceleration.
+    Where:
+    - $a_{\text{vert, prev}}$ is the vertical acceleration from the previous measurement.
 
-   ```math
-   j = \frac{a - a_0}{\Delta t}
-   ```
-
-   Where:
-
-   - `a_0` is the previous acceleration value.
-
-4. **Ambient Noise**: Measured in decibels (dBFS) using the device's microphone.
+4.  **Ambient Noise**: Measures the volume of ambient sound inside the elevator using the device's microphone. The measurement is provided in **decibels relative to full scale (dBFS)**, which indicates the amplitude of the audio signal compared to the maximum possible level the device can handle.
 
 ## University Project
 

@@ -2,7 +2,7 @@
 
 [English](./readme.md)
 
-Este aplicativo mede velocidade, aceleração, tranco (derivada da aceleração) e ruído ambiente de um elevador enquanto ele está em movimento.
+Este aplicativo mede velocidade, aceleração, tranco e ruído ambiente de um elevador enquanto ele está em movimento.
 Ele utiliza o acelerômetro e o microfone do dispositivo para coletar e analisar dados em tempo real.
 
 ![home](./docs/home-pt-br.png)
@@ -11,39 +11,35 @@ Ele utiliza o acelerômetro e o microfone do dispositivo para coletar e analisar
 
 O aplicativo calcula as seguintes métricas usando os sensores do dispositivo:
 
-1. **Aceleração**: Derivada dos dados do acelerômetro (eixos x, y, z).
+1.  **Aceleração**: O aplicativo isola a **aceleração vertical** (movimento na direção da gravidade). Ele funciona da seguinte forma:
 
-   ```math
-   a = \sqrt{x^2 + y^2 + (z - g_{\text{offset}})^2}
-   ```
+    - Determinando a direção precisa da gravidade ao comparar os dados brutos de aceleração com a aceleração total (que inclui a atração da gravidade).
+    - Projetando a aceleração linear do dispositivo na direção da gravidade calculada. Isso filtra o movimento horizontal e isola a verdadeira aceleração vertical do elevador.
+    - Uma pequena _deadband_ (zona morta) é aplicada ao valor final para evitar que o ruído do sensor cause desvios quando o elevador está parado.
 
-   Onde:
+    A aceleração vertical ($a_{\text{vert}}$) é conceitualmente calculada como o produto escalar do vetor de aceleração linear ($\vec{a}_{\text{lin}}$) e o vetor de gravidade normalizado ($\hat{g}$).
 
-   - `x, y, z` são os valores brutos do acelerômetro.
-   - `g offset` é o ajuste de gravidade calibrado no início da medição.
+    $a_{\text{vert}} = \vec{a}_{\text{lin}} \cdot \hat{g}$
 
-2. **Velocidade**: Calculada pela integração da aceleração ao longo do tempo.
+2.  **Velocidade**: Representa a **velocidade vertical**, que é calculada integrando numericamente a aceleração vertical ao longo do intervalo de tempo entre as medições.
 
-   ```math
-   v = v_0 + a \cdot \Delta t
-   ```
+    $v = v_{\text{prev}} + a_{\text{vert}} \cdot \Delta t$
 
-   Onde:
+    Onde:
 
-   - `v0` é a velocidade inicial (assumida como 0).
-   - `Delta t` é o intervalo de tempo entre as medições.
+    - $v_{\text{prev}}$ é a velocidade da medição anterior.
+    - $a_{\text{vert}}$ é a aceleração vertical atual.
+    - $\Delta t$ é o tempo decorrido desde a última medição.
 
-3. **Tranco**: A taxa de variação da aceleração.
+3.  **Tranco**: É a taxa de variação da **aceleração vertical**, que quantifica a suavidade do movimento do elevador.
 
-   ```math
-   j = \frac{a - a_0}{\Delta t}
-   ```
+    $j = \frac{a_{\text{vert}} - a_{\text{vert, prev}}}{\Delta t}$
 
-   Onde:
+    Onde:
 
-   - `a0` é o valor anterior da aceleração.
+    - $a_{\text{vert, prev}}$ é a aceleração vertical da medição anterior.
 
-4. **Ruído Ambiente**: Medido em decibéis (dBFS) usando o microfone do dispositivo.
+4.  **Ruído Ambiente**: Mede o volume do som ambiente dentro do elevador usando o microfone do dispositivo. A medição é fornecida em **decibéis relativos à escala máxima (dBFS)**, o que indica a amplitude do sinal de áudio em comparação com o nível máximo que o dispositivo pode registrar.
 
 ## Projeto Universitário
 
