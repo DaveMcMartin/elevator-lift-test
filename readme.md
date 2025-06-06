@@ -18,15 +18,11 @@ The app calculates the following metrics using the device's sensors:
 
     The vertical acceleration ($a_{\text{vert}}$) is conceptually calculated as the dot product of the linear acceleration vector ($\vec{a}_{\text{lin}}$) and the normalized gravity vector ($\hat{g}$).
 
-    ```math
-    a_{\text{vert}} = \vec{a}_{\text{lin}} \cdot \hat{g}
-    ```
+    ($a_{\text{vert}} = \vec{a}_{\text{lin}} \cdot \hat{g}$)
 
 2.  **Velocity**: This represents the **vertical velocity**, which is calculated by numerically integrating the vertical acceleration over the time interval between measurements.
 
-    ```math
-    v = v_{\text{prev}} + a_{\text{vert}} \cdot \Delta t
-    ```
+    $v = v_{\text{prev}} + a_{\text{vert}} \cdot \Delta t$
 
     Where:
     - `$v_{\text{prev}}$` is the velocity from the previous measurement.
@@ -35,9 +31,7 @@ The app calculates the following metrics using the device's sensors:
 
 3.  **Jerk**: This is the rate of change of **vertical acceleration**, which quantifies the smoothness of the elevator's motion.
 
-    ```math
-    j = \frac{a_{\text{vert}} - a_{\text{vert, prev}}}{\Delta t}
-    ```
+    $j = \frac{a_{\text{vert}} - a_{\text{vert, prev}}}{\Delta t}$
 
     Where:
     - `$a_{\text{vert, prev}}$` is the vertical acceleration from the previous measurement.
